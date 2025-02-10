@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Page</title>
+    <link rel="stylesheet" href="css/style.css">
+   <style>
+    .container {
+        background: var(--white);
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        width: 40rem;
+        text-align: center;
+        margin: 10rem auto; /* يضع النموذج في منتصف الصفحة */
+        position: relative;
+        top: 2rem;
+    }
+
+    h2 {
+        margin-bottom: 20px;
+        font-size: 2.4rem;
+        color: var(--black);
+        font-weight: bold;
+    }
+
+    label {
+        display: block;
+        text-align: left;
+        margin-top: 12px;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--black);
+    }
+
+    input {
+        width: 100%;
+        padding: 12px;
+        margin-top: 6px;
+        border: 2px solid var(--light-bg);
+        border-radius: 6px;
+        font-size: 1.6rem;
+        background-color: var(--light-bg);
+        color: var(--black);
+        transition: 0.3s ease-in-out;
+    }
+
+    input:focus {
+        border-color: var(--main-color);
+        outline: none;
+        box-shadow: 0px 0px 5px var(--main-color);
+        background-color: var(--white);
+    }
+
+    button {
+        background: var(--main-color);
+        color: white;
+        padding: 14px;
+        font-size: 1.8rem;
+        border: none;
+        width: 100%;
+        margin-top: 20px;
+        cursor: pointer;
+        border-radius: 8px;
+        font-weight: bold;
+        transition: 0.3s ease-in-out;
+    }
+
+    button:hover {
+        background: var(--orange);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    #paymentStatus {
+        margin-top: 15px;
+        font-weight: bold;
+        font-size: 1.6rem;
+        color: var(--main-color);
+    }
+
+    /* تحسين التجاوب مع الشاشات الصغيرة */
+    @media (max-width: 768px) {
+        .container {
+            width: 90%;
+            padding: 25px;
+            margin-top: 5rem;
+        }
+    }
+</style>
+
+    
+</head>
+<body>
+    <header class="header">
+   
+        <section class="flex">
+     
+           <a href="home.html" class="logo">Educa.</a>
+     
+           <form action="search.html" method="post" class="search-form">
+              <input type="text" name="search_box" required placeholder="search courses..." maxlength="100">
+              <button type="submit" class="fas fa-search"></button>
+           </form>
+     
+           <div class="icons">
+              <div id="menu-btn" class="fas fa-bars"></div>
+              <div id="search-btn" class="fas fa-search"></div>
+              <div id="user-btn" class="fas fa-user"></div>
+              <div id="toggle-btn" class="fas fa-sun"></div>
+           </div>
+     
+           <div class="profile">
+              <img src="images/pic-1.jpg" class="image" alt="">
+              <h3 class="name">shaikh anas</h3>
+              <p class="role">studen</p>
+              <a href="profile.html" class="btn">view profile</a>
+              <div class="flex-btn">
+                 <a href="login.html" class="option-btn">login</a>
+                 <a href="register.html" class="option-btn">register</a>
+              </div>
+           </div>
+     
+        </section>
+     
+     </header>   
+     
+     <div class="side-bar">
+     
+        <div id="close-btn">
+           <i class="fas fa-times"></i>
+        </div>
+     
+        <div class="profile">
+           <img src="images/pic-1.jpg" class="image" alt="">
+           <h3 class="name">shaikh anas</h3>
+           <p class="role">studen</p>
+           <a href="profile.html" class="btn">view profile</a>
+        </div>
+     
+        <nav class="navbar">
+           <a href="home.html"><i class="fas fa-home"></i><span>home</span></a>
+           <a href="about.html"><i class="fas fa-question"></i><span>about</span></a>
+           <a href="courses.html"><i class="fas fa-graduation-cap"></i><span>courses</span></a>
+           <a href="teachers.html"><i class="fas fa-chalkboard-user"></i><span>teachers</span></a>
+           <a href="contact.html"><i class="fas fa-headset"></i><span>contact us</span></a>
+        </nav>
+     
+     </div>
+     
+    <div class="container">
+        <h2>Payment Checkout</h2>
+        <form id="paymentForm">
+            <label for="cardNumber">Card Number:</label>
+            <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" required>
+
+            <label for="expiryDate">Expiry Date:</label>
+            <input type="text" id="expiryDate" placeholder="MM/YY" required>
+
+            <label for="cvv">CVV:</label>
+            <input type="text" id="cvv" placeholder="123" required>
+
+            <label for="amount">Amount ($):</label>
+            <input type="number" id="amount" placeholder="Enter amount" required>
+
+            <button type="submit">Pay Now</button>
+        </form>
+
+        <div id="paymentStatus"></div>
+    </div>
+
+    
+    <script src="js/script.js"></script>
+
+</body>
+</html>

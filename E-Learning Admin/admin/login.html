@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="ssss.css" >
+    <title>Login</title>
+
+</head>
+<body>
+    <div class="login">
+        <h2>Login</h2>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+        <p id="error" class="error"></p>
+    </div>
+    <script>
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const error = document.getElementById('error');
+
+            if (email === 'admin@gmail.com' && password === '123456') {
+                localStorage.setItem('authenticated', 'true');
+                window.location.href = 'crud.html';
+            } else {
+                error.textContent = 'Invalid email or password';
+            }
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Management</title>
+    <link rel="stylesheet" href="ssss.css">
+</head>
+<body>
+    <div class="crud">
+        <div class="head">
+            <h2>Course Management</h2>
+            <p>Manage Courses Effectively</p>
+        </div>
+
+        <div class="inputs">
+            <input type="text" id="title" placeholder="Course Title">
+            <input type="text" id="image" placeholder="Image URL">
+            <input type="text" id="category" placeholder="Category">
+            <input type="text" id="instructor" placeholder="Instructor Name">
+            <textarea id="description" placeholder="Course Description"></textarea>
+            <input type="number" id="price" placeholder="Price (if applicable)">
+            <input type="text" id="duration" placeholder="Duration">
+            <input type="text" id="video" placeholder="Video URL">
+            <input type="text" id="pdf" placeholder="PDF URL">
+            <button id="submit">Create</button>
+        </div>
+
+        <div class="outputs">
+            <div class="searchBlock">
+                <input type="text" id="search" placeholder="Search" onkeyup="searchData(this.value)">
+                <div class="btnSearch">
+                    <button id="searchTitle" onclick="getSearchMode(this.id)">Search By Title</button>
+                    <button id="searchCategory" onclick="getSearchMode(this.id)">Search By Category</button>
+                </div>
+            </div>
+            <div id="deleteAll"></div>
+
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Duration</th>
+                    <th>Update</th>
+                    <th>Delete</th>
+                </tr>
+                <tbody id="tbody"></tbody>
+            </table>
+            <h3>Approve or Ignore Course Requests</h3>
+            <table>
+                <tr>
+                    <th>Username</th>
+                    <th>Course Title</th>
+                    <th>Approve</th>
+                    <th>Ignore</th>
+                </tr>
+                <tbody id="approval-tbody">
+                    <!-- Example row for user-course approval -->
+                    <tr>
+                        <td>JohnDoe</td>
+                        <td>React Advanced</td>
+                        <td><button onclick="approveCourse('JohnDoe', 'React Advanced')">Approve</button></td>
+                        <td><button onclick="ignoreCourse('JohnDoe', 'React Advanced')">Ignore</button></td>
+                    </tr>
+                    <!-- More rows can be added dynamically here -->
+                </tbody>
+            </table>
+        </div>
+        <a href="./login.html">
+            <button style="background-color: lightcoral; border: none; color: white; padding: 10px 20px; cursor: pointer;color:black;">
+                Logout
+            </button>
+        </a>
+    </div>
+    <script type="module" src="js.js"></script>
+    <script>
+    window.onload = function() {
+        if (localStorage.getItem('authenticated') !== 'true') {
+            window.location.href = './login.html'; }
+        
+            
+    function approveCourse(username, courseTitle) {
+        console.log('Approved course:', courseTitle, 'for user:', username);
+       
+    }
+
+    function ignoreCourse(username, courseTitle) {
+        console.log('Ignored course:', courseTitle, 'for user:', username);
+      
+    }
+
+    function updateCourse(courseId) {
+        console.log('Update course with ID:', courseId);
+    }
+
+    function deleteCourse(courseId) {
+        console.log('Delete course with ID:', courseId);
+     
+    }
+    };
+    </script>
+</body>
+</html>

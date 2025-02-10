@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>register</title>
+
+   <!-- Firebase JS SDK -->
+   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-auth.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js"></script>
+
+   <!-- font awesome cdn link  -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+
+   <!-- custom css file link  -->
+   <link rel="stylesheet" href="css/style.css">
+
+   <link rel="icon" href="./images/pic-1.jpg" type="image/x-icon">
+
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+</head>
+
+<body>
+
+   <header class="header">
+      <section class="flex">
+         <a href="home.html" class="logo">E-Learning</a>
+         <form action="search.html" method="post" class="search-form">
+            <input type="text" name="search_box" required placeholder="search courses..." maxlength="100">
+            <button type="submit" class="fas fa-search"></button>
+         </form>
+         <div class="icons">
+            <div id="menu-btn" class="fas fa-bars"></div>
+            <div id="search-btn" class="fas fa-search"></div>
+            <div id="user-btn" class="fas fa-user"></div>
+            <div id="toggle-btn" class="fas fa-sun"></div>
+         </div>
+      </section>
+   </header>
+
+   <div class="side-bar">
+      <div id="close-btn">
+         <i class="fas fa-times"></i>
+      </div>
+      <div class="profile">
+         <img src="images/pic-1.jpg" class="image" alt="">
+         <h3 class="name">Speed Team</h3>
+         <p class="role">student</p>
+         <a href="profile.html" class="btn">view profile</a>
+      </div>
+      <nav class="navbar">
+         <a href="home.html"><i class="fas fa-home"></i><span>home</span></a>
+         <a href="about.html"><i class="fas fa-question"></i><span>about</span></a>
+         <a href="courses.html"><i class="fas fa-graduation-cap"></i><span>courses</span></a>
+         <a href="teachers.html"><i class="fas fa-chalkboard-user"></i><span>teachers</span></a>
+         <a href="contact.html"><i class="fas fa-headset"></i><span>contact us</span></a>
+      </nav>
+   </div>
+
+   <section class="form-container">
+      <form id="register-form" onsubmit="registerUser(event)">
+         <h3>register now</h3>
+         <p>your name <span>*</span></p>
+         <input type="text" id="name" placeholder="enter your name" required maxlength="50" class="box">
+         <span id="name-error" style="color: red; display: none;">Name must contain only letters and spaces, and be between 3 and 50 characters.</span>
+
+         <p>your email <span>*</span></p>
+         <input type="email" id="email" placeholder="enter your email" required maxlength="50" class="box">
+         <span id="email-error" style="color: red; display: none;">Invalid email format.</span>
+
+         <p>your password <span>*</span></p>
+         <div class="password-container" style="position: relative;">
+         <input type="password" id="password" placeholder="enter your password" required maxlength="20" class="box">
+         <i class="fas fa-eye" id="password-toggle" style="cursor: pointer; position: absolute; right: 30px; top: 27px;"></i>
+      </div>
+         <span id="password-error" style="color: red; display: none;">Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.</span>
+
+         <p>confirm password <span>*</span></p>
+         <div class="password-container" style="position: relative;">
+            <input type="password" id="confirm-password" placeholder="confirm your password" required maxlength="20" class="box">
+         <i class="fas fa-eye" id="confirm-password-toggle" style="cursor: pointer; position: absolute; right: 30px; top: 30px;"></i>
+         
+        </div>
+         <span id="confirm-password-error" style="color: red; display: none;">Passwords do not match!</span>
+
+         <p>select profile <span>*</span></p>
+         <input type="file" id="profile-image" accept="image/*" required class="box">
+         <input type="submit" value="register new" class="btn">
+      </form>
+   </section>
+
+   <footer class="footer">
+      &copy; copyright @ 2025 by <span>Speed Team</span> | all rights reserved!
+   </footer>
+
+
+   <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
+      import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-auth.js";
+      import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js";
+
+      const firebaseConfig = {
+         apiKey: "AIzaSyDkqGCjX0aVZkbF_sh7cMSzjei62jp7xhU",
+         authDomain: "e-learning-project-98abd.firebaseapp.com",
+         projectId: "e-learning-project-98abd",
+         storageBucket: "e-learning-project-98abd.appspot.com",
+         messagingSenderId: "640846153917",
+         appId: "1:640846153917:web:351d64332de23dfd024fd4",
+         measurementId: "G-B3FJWRYE9V"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const db = getFirestore(app);
+
+      document.getElementById("register-form").addEventListener("submit", async function (event) {
+         event.preventDefault();
+
+         const name = document.getElementById("name").value.trim();
+         const email = document.getElementById("email").value.trim();
+         const password = document.getElementById("password").value;
+         const confirmPassword = document.getElementById("confirm-password").value;
+         const profileImageInput = document.getElementById("profile-image");
+
+         // Validation rules
+         if (!/^[a-zA-Z\s]{3,50}$/.test(name)) {
+            alert("Name must contain only letters and spaces, and be between 3 and 50 characters.");
+            return;
+         }
+         
+         if (!validateEmail(email)) {
+            alert("Invalid email format.");
+            return;
+         }
+         if (!validatePassword(password)) {
+            alert("Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character.");
+            return;
+         }
+         if (password !== confirmPassword) {
+            alert("Passwords do not match!");
+            return;
+         }
+         if (!profileImageInput.files.length) {
+            alert("Please select a profile image.");
+            return;
+         }
+
+         const file = profileImageInput.files[0];
+         const reader = new FileReader();
+         reader.readAsDataURL(file);
+         reader.onload = async function () {
+            const profileImageBase64 = reader.result;
+
+            try {
+               const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+               const user = userCredential.user;
+
+               await setDoc(doc(db, "users", user.uid), {
+                  name: name,
+                  email: email,
+                  image: profileImageBase64
+               });
+
+               alert("User registered successfully!");
+               window.location.href = "login.html";
+            } catch (error) {
+               alert("Error: " + error.message);
+            }
+         };
+         reader.onerror = function (error) {
+            alert("Error reading file: " + error.message);
+         };
+      });
+
+      function validateEmail(email) {
+         const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+         return re.test(email);
+      }
+
+      function validatePassword(password) {
+         return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/.test(password);
+      }
+
+      // Password visibility toggle functionality
+      const togglePasswordVisibility = (inputId, iconId) => {
+         const passwordField = document.getElementById(inputId);
+         const toggleIcon = document.getElementById(iconId);
+         if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+         } else {
+            passwordField.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+         }
+      };
+
+      // Event listener for password visibility toggle
+      document.getElementById("password-toggle").addEventListener("click", () => {
+         togglePasswordVisibility("password", "password-toggle");
+      });
+
+      document.getElementById("confirm-password-toggle").addEventListener("click", () => {
+         togglePasswordVisibility("confirm-password", "confirm-password-toggle");
+      });
+
+      // Focus and Blur events to show validation messages
+      const validateOnBlur = (inputId, errorId, validateFunction) => {
+         const inputField = document.getElementById(inputId);
+         const errorMessage = document.getElementById(errorId);
+         
+         inputField.addEventListener("focus", () => {
+            inputField.style.borderColor = "blue";
+         });
+
+         inputField.addEventListener("blur", () => {
+            const isValid = validateFunction(inputField.value);
+            if (!isValid) {
+               inputField.style.borderColor = "red";
+               errorMessage.style.display = "block";
+            } else {
+               inputField.style.borderColor = "green";
+               errorMessage.style.display = "none";
+            }
+         });
+      };
+
+      validateOnBlur("name", "name-error", (value) => /^[a-zA-Z\s]{3,50}$/.test(value));
+      validateOnBlur("email", "email-error", (value) => validateEmail(value));
+      validateOnBlur("password", "password-error", (value) => validatePassword(value));
+      validateOnBlur("confirm-password", "confirm-password-error", (value) => value === document.getElementById("password").value);
+
+   </script>
+   <script src="js/script.js"></script>
+</body>
+</html>

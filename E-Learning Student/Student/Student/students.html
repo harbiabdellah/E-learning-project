@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Learning System</title>
+    <link rel="stylesheet" href="css/style.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+
+    <style>
+        
+        
+        /* تنسيق القسم العام للكورسات */
+#courses {
+    background-color: #f9f9f9;  /* خلفية فاتحة */
+    padding: 60px;              /* إضافة padding */
+    border-radius: 8px;         /* إضافة حواف دائرية */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* إضافة ظل خفيف */
+}
+
+#courses h2 {
+    font-size: 24px;            /* حجم الخط للعنوان */
+    color: #8e44ad;             /* لون النص */
+    font-weight: bold;          /* جعل النص عريض */
+    text-align: center;         /* محاذاة العنوان في المنتصف */
+    margin-bottom: 20px;        /* إضافة مسافة أسفل العنوان */
+}
+
+#courseList {
+    display: grid;              /* استخدام grid لعرض العناصر */
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* عرض الأعمدة تلقائيًا */
+    gap: 40px;                  /* إضافة مسافة بين العناصر */
+}
+
+#courseList div {
+    background-color: white;    /* خلفية لكل عنصر */
+    padding: 15px;               /* إضافة padding داخل العنصر */
+    border-radius: 8px;          /* إضافة حواف دائرية للعنصر */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* إضافة ظل خفيف */
+    transition: transform 0.3s ease; /* تأثير الانتقال */
+}
+
+#courseList div:hover {
+    transform: translateY(-5px); /* تحريك العنصر عند التمرير عليه */
+}
+
+button {
+    background-color: #8e44ad; /* لون خلفية الزر */
+    color: white;              /* لون النص داخل الزر */
+    padding: 10px 15px;        /* إضافة padding داخل الزر */
+    border: none;              /* إزالة الحدود */
+    border-radius: 5px;        /* إضافة حواف دائرية */
+    cursor: pointer;           /* تغيير المؤشر عند المرور على الزر */
+    transition: background-color 0.3s ease; /* تأثير الانتقال */
+    margin-top: 10px;
+}
+
+button:hover {
+    background-color: #732d91; /* تغيير اللون عند المرور على الزر */
+}
+
+/* تنسيق الـ Wishlist */
+#wishlist {
+    background-color: #f1f1f1; /* خلفية فاتحة */
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 40px; /* المسافة بين الـ Wishlist وباقي المحتوى */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#wishlist h2 {
+    font-size: 28px;
+    color: #8e44ad;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#wishlistItems {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.wishlist-item {
+    background-color: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.wishlist-item:hover {
+    transform: translateY(-5px);
+}
+
+.wishlist-item img {
+    width: 100px;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.wishlist-item h3 {
+    font-size: 18px;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.wishlist-item button {
+    background-color: #e74c3c; /* اللون الأحمر لإزالة الكورس */
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.wishlist-item button:hover {
+    background-color: #c0392b; /* تغيير اللون عند المرور */
+}
+
+/* التنسيق للزر "Go to Wishlist" */
+#goToWishlistBtn {
+    background-color: #8e44ad;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    transition: background-color 0.3s ease;
+}
+
+#goToWishlistBtn:hover {
+    background-color: #732d91;
+}
+
+/* pop-up */
+.popup {
+   /* display: none; /* اختفاء الـ pop-up افتراضيًا */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+}
+
+.popup button {
+    margin-top: 20px;
+    background-color: #8e44ad;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.popup button:hover {
+    background-color: #732d91;
+}
+/* Pop-up styles */
+.popup {
+    display: none; /* لا يظهر في البداية */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* خلفية مظللة */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* لإظهار الـ pop-up فوق العناصر الأخرى */
+}
+
+.popup-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+}
+
+.popup button {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #8e44ad;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.popup button:hover {
+    background-color: #9b59b6;
+}
+
+/* Pop-up style */
+.popup {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    justify-content: center;
+    align-items: center;
+}
+
+.popup-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.popup button {
+    padding: 10px 20px;
+    margin: 5px;
+    background-color: #8e44ad;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.popup button:hover {
+    background-color: #9b59b6;
+}
+
+
+
+</style>
+</head>
+<body>
+    <header class="header">
+        <section class="flex">
+           <a href="home.html" class="logo">E-Learning</a>
+           <!-- <form action="search.html" method="post" class="search-form">
+              <input type="text" name="search_box" required placeholder="search courses..." maxlength="100">
+              <button type="submit" class="fas fa-search"></button>
+           </form> -->
+
+           
+           <div class="icons">
+              <div id="menu-btn" class="fas fa-bars"></div>
+              <div id="search-btn" class="fas fa-search"></div>
+              <div id="user-btn" class="fas fa-user"></div>
+              <div id="toggle-btn" class="fas fa-sun"></div>
+           </div>
+           <div class="profile">
+              <img src="images/pic-1.jpg" class="image" alt="">
+              <h3 class="name">Abanoub Emad</h3>
+              <p class="role">student</p>
+              <a href="profile.html" class="btn">view profile</a>
+              <div class="flex-btn">
+                 <a href="login.html" class="option-btn">login</a>
+                 <a href="register.html" class="option-btn">register</a>
+              </div>
+           </div>
+        </section>
+     </header>   
+     
+     <div class="side-bar">
+        <div id="close-btn">
+           <i class="fas fa-times"></i>
+        </div>
+        <div class="profile">
+           <img src="images/pic-1.jpg" class="image" alt="">
+           <h3 class="name">Speed Team</h3>
+           <p class="role">student</p>
+           <a href="profile.html" class="btn">view profile</a>
+        </div>
+        <nav class="navbar">
+           <a href="home.html"><i class="fas fa-home"></i><span>home</span></a>
+           <a href="about.html"><i class="fas fa-question"></i><span>about</span></a>
+           <a href="courses.html"><i class="fas fa-graduation-cap"></i><span>courses</span></a>
+           <a href="teachers.html"><i class="fas fa-chalkboard-user"></i><span>teachers</span></a>
+           <a href="contact.html"><i class="fas fa-headset"></i><span>contact us</span></a>
+        </nav>
+     </div>
+    
+    <main>
+     
+
+     
+        <input type="text" id="searchInput" placeholder="Search courses..." />
+        <select id="categoryFilter">
+            <option value="all">All Categories</option>
+        </select>
+        
+
+ <div id="courseList"></div>
+
+        <section id="courses">
+            <h2>Available Courses</h2>
+            <div id="courseList"></div>
+        </section>
+<!-- زر للانتقال إلى Wishlist -->
+<button id="goToWishlistBtn">Go to Wishlist</button>
+
+
+       <!-- قسم الـ Wishlist -->
+<section id="wishlist">
+    <h2>My Wishlist</h2>
+    <div id="wishlistItems"></div>
+</section>
+
+
+        <section id="progress">
+            <h2>My Progress</h2>
+            <div id="progressList"></div>
+        </section>
+    </main>
+
+
+<!-- Pop-up message -->
+<div id="popup" class="popup">
+    <div class="popup-content">
+        <p id="popupMessage"></p>
+        <button id="closePopupBtn">Close</button>
+    </div>
+</div>
+<!-- Pop-up for delete confirmation -->
+<div id="deletePopup" class="popup">
+    <div class="popup-content">
+        <p id="deletePopupMessage">Are you sure you want to delete this course?</p>
+        <button id="confirmDeleteBtn">Yes</button>
+        <button id="cancelDeleteBtn">No</button>
+    </div>
+</div>
+
+
+
+
+
+    <footer class="footer">
+        &copy; copyright @ 2025 by <span>Speed Team</span> | all rights reserved!
+     </footer>
+
+
+    <section id="addCourse">
+    <h2>Add New Course</h2> 
+    <form id="courseForm">
+        <input type="text" id="title" placeholder="Course Title" required>
+        <input type="text" id="description" placeholder="Description" required>
+        <input type="text" id="category" placeholder="Category" required>
+        <input type="text" id="duration" placeholder="Duration (e.g., 4 Weeks)" required>
+        <input type="number" id="price" placeholder="Price (0 if free)" required>
+        <input type="text" id="image" placeholder="Image Path (e.g., images/course1.jpg)" required>
+        <button type="submit">Add Course</button>
+    </form>
+ </section>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

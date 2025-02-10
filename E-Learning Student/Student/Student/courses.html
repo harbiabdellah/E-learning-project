@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Courses</title>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+   <link rel="stylesheet" href="css/style.css">
+   <style>
+     
+      
+      
+      
+   </style>
+</head>
+<body>
+
+
+   <header class="header">
+   
+      <section class="flex">
+   
+         <a href="home.html" class="logo">E-Learning</a>
+   
+         <form action="search.html" method="post" class="search-form">
+            <input type="text" name="search_box" required placeholder="search courses..." maxlength="100">
+            <button type="submit" class="fas fa-search"></button>
+         </form>
+   
+         <div class="icons">
+            <div id="menu-btn" class="fas fa-bars"></div>
+            <div id="search-btn" class="fas fa-search"></div>
+            <div id="user-btn" class="fas fa-user"></div>
+            <div id="toggle-btn" class="fas fa-sun"></div>
+         </div>
+   
+         <div class="profile">
+            <img src="images/pic-1.jpg" class="image" alt="">
+            <h3 class="name">Abanoub Emad</h3>
+            <p class="role">student</p>
+            <a href="profile.html" class="btn">view profile</a>
+            <div class="flex-btn">
+               <a href="login.html" class="option-btn">login</a>
+               <a href="register.html" class="option-btn">register</a>
+            </div>
+         </div>
+   
+      </section>
+   
+      
+   </header>   
+<!-- نافذة منبثقة للرسائل -->
+
+<div class="side-bar">
+
+   <div id="close-btn">
+      <i class="fas fa-times"></i>
+   </div>
+
+   <div class="profile">
+      <img src="images/pic-1.jpg" class="image" alt="">
+      <h3 class="name">Abanoub Emad</h3>
+      <p class="role">student</p>
+      <a href="profile.html" class="btn">view profile</a>
+   </div>
+
+   <nav class="navbar">
+      <a href="home.html"><i class="fas fa-home"></i><span>home</span></a>
+      <a href="about.html"><i class="fas fa-question"></i><span>about</span></a>
+      <a href="courses.html"><i class="fas fa-graduation-cap"></i><span>courses</span></a>
+      <a href="teachers.html"><i class="fas fa-chalkboard-user"></i><span>teachers</span></a>
+      <a href="contact.html"><i class="fas fa-headset"></i><span>contact us</span></a>
+      <!-- <a href="students.html"><i class="fas fa-headset"></i><span>studen</span></a> -->
+     
+   </nav>
+
+</div>
+
+
+
+<div style="text-align:center; margin-bottom:20px;">
+   <input type="text" id="searchInput" placeholder="Search courses...">
+   <select id="categoryFilter">
+      <option value="all">All Categories</option>
+   </select>
+</div>
+
+
+<section class="courses">
+   <h1 class="heading">Our Courses</h1>
+   <div class="box-container" id="courses-container">
+      <p>Loading courses...</p>
+   </div>
+</section>
+
+<!-- Buttons to toggle between wishlist and enrolled courses -->
+<div style="text-align:center; margin-bottom:20px;">
+   <button id="show-wishlist-btn" class="btn">Show Wishlist</button>
+   <button id="show-enrolled-btn" class="btn">Show Enrolled Courses</button>
+</div>
+
+<section class="wishlist" id="wishlist-section" style="display:none;">
+   <h2 class="section-title">Your Wishlist</h2>
+   <div class="box-container" id="wishlist-container">
+      <p>Loading wishlist...</p>
+   </div>
+</section>
+
+<section class="enrolled" id="enrolled-section" style="display:none;">
+   <h2 class="section-title">Your Enrolled Courses</h2>
+   <div class="box-container" id="enrolled-container">
+      <p>Loading enrolled courses...</p>
+   </div>
+</section>
+<!-- General Pop-up -->
+<div id="popup" class="popup">
+   <div class="popup-content">
+       <p id="popupMessage"></p>
+       <button id="closePopupBtn">Close</button>
+   </div>
+</div>
+
+<!-- Delete Confirmation Pop-up -->
+<div id="deletePopup" class="popup">
+   <div class="popup-content">
+       <p id="deletePopupMessage">Are you sure you want to delete this course?</p>
+       <button id="confirmDeleteBtn">Yes</button>
+       <button id="cancelDeleteBtn">No</button>
+   </div>
+</div>
+
+<footer class="footer">
+   &copy; 2025 <span>Speed Team</span> | All rights reserved!
+</footer>
+
+<script type="module">
+   import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
+   import { getFirestore, collection, getDocs, addDoc, Timestamp, query, where, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-firestore.js";
+   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-auth.js";
+
+   const firebaseConfig = {
+         apiKey: "AIzaSyDkqGCjX0aVZkbF_sh7cMSzjei62jp7xhU",
+         authDomain: "e-learning-project-98abd.firebaseapp.com",
+         projectId: "e-learning-project-98abd",
+         storageBucket: "e-learning-project-98abd.appspot.com",
+         messagingSenderId: "640846153917",
+         appId: "1:640846153917:web:351d64332de23dfd024fd4",
+         measurementId: "G-B3FJWRYE9V"
+      };
+
+   const app = initializeApp(firebaseConfig);
+   const db = getFirestore(app);
+   const auth = getAuth(app);
+
+   let currentUserId = null;
+
+   onAuthStateChanged(auth, (user) => {
+      if (user) {
+         currentUserId = user.uid;
+      } else {
+         currentUserId = null;
+         alert('Please log in to view your courses');
+      }
+   });
+   
+   
+   // Fetch Courses and Render on Page
+   async function fetchCourses() {
+      const coursesContainer = document.getElementById("courses-container");
+      coursesContainer.innerHTML = "<p>Loading courses...</p>";
+      try {
+         const querySnapshot = await getDocs(collection(db, "courses"));
+         coursesContainer.innerHTML = "";
+         querySnapshot.forEach((doc) => {
+            const course = doc.data();
+            const courseHTML = `
+               <div class="course-card" data-course-id="${doc.id}">
+                  <img src="${course.image}" alt="Course Image" class="course-img">
+                  <div class="course-content">
+                     <h3>${course.title}</h3>
+                     <p>${course.description}</p>
+                     <span>Categories: ${course.category}</span>
+                     <span> ${course.duration}</span>
+                     <span>Price: ${course.price == 0 ? "Free" : "$" + course.price}</span>
+                     <a href="#" class="btn enroll-btn">Enroll</a>
+                     <a href="#" class="btn wishlist-btn">Add to Wishlist</a>
+                     <a href="playlist.html" class="btn viewList-btn"> View The List </a>
+                     <a href="payment.html" class="btn payment-btn"> payment </a>
+                  </div>
+               </div>
+            `;
+            coursesContainer.innerHTML += courseHTML;
+         });
+
+         // Add event listeners after rendering courses
+         const enrollBtns = document.querySelectorAll('.enroll-btn');
+         enrollBtns.forEach((btn) => {
+            btn.addEventListener('click', function(e) {
+               e.preventDefault();
+               const courseId = this.closest('.course-card').getAttribute('data-course-id');
+               const courseTitle = this.closest('.course-card').querySelector('h3').textContent;
+               enrollCourse(courseId, courseTitle);
+            });
+         });
+
+         const wishlistBtns = document.querySelectorAll('.wishlist-btn');
+         wishlistBtns.forEach((btn) => {
+            btn.addEventListener('click', function(e) {
+               e.preventDefault();
+               const courseId = this.closest('.course-card').getAttribute('data-course-id');
+               const courseTitle = this.closest('.course-card').querySelector('h3').textContent;
+               addToWishlist(courseId, courseTitle);
+            });
+         });
+
+      } catch (error) {
+         coursesContainer.innerHTML = `<p>Error loading courses: ${error.message}</p>`;
+      }
+   }
+
+   // Fetch Wishlist
+   async function fetchWishlist() {
+      const wishlistContainer = document.getElementById("wishlist-container");
+      wishlistContainer.innerHTML = "<p>Loading wishlist...</p>";
+      try {
+         const q = query(collection(db, "wishlist"), where("userId", "==", currentUserId));
+         const querySnapshot = await getDocs(q);
+         wishlistContainer.innerHTML = "";
+         querySnapshot.forEach((doc) => {
+            const wishlistItem = doc.data();
+            const wishlistHTML = `
+               <div class="course-card">
+                  <h3>${wishlistItem.courseTitle}</h3>
+<a href="#" class="btn remove-wishlist-btn" data-doc-id="${doc.id}">Remove from Wishlist</a>
+
+               </div>
+            `;
+            wishlistContainer.innerHTML += wishlistHTML;
+         });
+      } catch (error) {
+         wishlistContainer.innerHTML = `<p>Error loading wishlist: ${error.message}</p>`;
+      }
+   }
+
+   // Fetch Enrolled Courses
+   async function fetchEnrolledCourses() {
+      const enrolledContainer = document.getElementById("enrolled-container");
+      enrolledContainer.innerHTML = "<p>Loading enrolled courses...</p>";
+      try {
+         const q = query(collection(db, "enrollments"), where("userId", "==", currentUserId), where("approved", "==", true));
+         const querySnapshot = await getDocs(q);
+         enrolledContainer.innerHTML = "";
+         querySnapshot.forEach((doc) => {
+            const enrolledCourse = doc.data();
+            const enrolledHTML = `
+               <div class="course-card">
+                  <h3>${enrolledCourse.courseTitle}</h3>
+                  <span class="pending">Pending Approval</span>
+               </div>
+            `;
+            enrolledContainer.innerHTML += enrolledHTML;
+         });
+      } catch (error) {
+         enrolledContainer.innerHTML = `<p>Error loading enrolled courses: ${error.message}</p>`;
+      }
+   }
+
+   // Add to Wishlist
+   async function addToWishlist(courseId, courseTitle) {
+   try {
+      const q = query(collection(db, "wishlist"), where("userId", "==", currentUserId), where("courseId", "==", courseId));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+         showPopup('This course is already in your wishlist!');
+         return; // Exit the function if the course is already in wishlist
+      }
+
+      await addDoc(collection(db, "wishlist"), {
+         userId: currentUserId,
+         courseId,
+         courseTitle
+      });
+      showPopup('Course added to wishlist!');
+      fetchWishlist(); // Re-fetch the wishlist to show the updated list
+
+   } catch (error) {
+      showPopup('Error adding to wishlist: ' + error.message);   }
+}
+
+
+   // Enroll Course
+   async function enrollCourse(courseId, courseTitle) {
+   try {
+      const q = query(collection(db, "enrollments"), where("userId", "==", currentUserId), where("courseId", "==", courseId));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+
+         showPopup('You are already enrolled in this course!');
+         /*alert();*/
+         return; // Exit the function if the user is already enrolled in the course
+      }
+
+      await addDoc(collection(db, "enrollments"), {
+         userId: currentUserId,
+         courseId,
+         courseTitle,
+         approved: false
+      });
+      showPopup('Course enrollment request sent!');
+      fetchEnrolledCourses(); // Re-fetch enrolled courses to update the list
+
+   } catch (error) {
+      showPopup('Error enrolling in course: ' + error.message);
+   }
+}
+
+
+   
+
+   // Toggle between sections
+   document.getElementById("show-wishlist-btn").addEventListener('click', () => {
+      document.getElementById("wishlist-section").style.display = 'block';
+      document.getElementById("enrolled-section").style.display = 'none';
+      fetchWishlist();
+   });
+
+   document.getElementById("show-enrolled-btn").addEventListener('click', () => {
+      document.getElementById("wishlist-section").style.display = 'none';
+      document.getElementById("enrolled-section").style.display = 'block';
+      fetchEnrolledCourses();
+   });
+
+   // Initial load
+   fetchCourses();
+
+
+   async function debugWishlist() {
+      const q = query(collection(db, "wishlist"));
+      const querySnapshot = await getDocs(q);
+  
+      console.log("📌 DEBUG: All Wishlist Entries");
+      querySnapshot.forEach((docSnap) => {
+          console.log(docSnap.id, "=>", docSnap.data());
+      });
+  }
+  debugWishlist(); 
+  
+  document.addEventListener("DOMContentLoaded", () => {
+   document.getElementById("wishlist-container").addEventListener("click", async function (event) {
+       if (event.target.classList.contains("remove-wishlist-btn")) {
+           event.preventDefault();
+
+           const docId = event.target.getAttribute("data-doc-id");
+           if (!docId) return;
+
+           console.log("📌 Attempting to remove document ID:", docId);
+           console.log("📌 Current User ID:", currentUserId);
+
+           if (!currentUserId) {
+               alert("Please log in to modify your wishlist.");
+               return;
+           }
+
+           const confirmation = confirm('Are you sure you want to remove this course from your wishlist?');
+           if (!confirmation) return;
+
+           try {
+               await deleteDoc(doc(db, "wishlist", docId));
+               console.log("📌 Successfully deleted:", docId);
+               alert('Course removed from wishlist!');
+               fetchWishlist(); 
+           } catch (error) {
+               alert('Error removing from wishlist: ' + error.message);
+           }
+       }
+   });
+  
+
+});
+
+   // Function to show a general pop-up message
+function showPopup(message) {
+   const popup = document.getElementById("popup");
+   const popupMessage = document.getElementById("popupMessage");
+   const closePopupBtn = document.getElementById("closePopupBtn");
+
+   popupMessage.textContent = message; // Set message
+   popup.style.display = "flex"; // Show pop-up
+
+   // Ensure no multiple event listeners
+   closePopupBtn.onclick = () => popup.style.display = "none";
+   
+   // Close when clicking outside the content
+   popup.onclick = (e) => { if (e.target === popup) popup.style.display = "none"; };
+}
+
+// Function to show delete confirmation pop-up
+function confirmRemove(courseId, courseTitle) {
+   const deletePopup = document.getElementById("deletePopup");
+   const deletePopupMessage = document.getElementById("deletePopupMessage");
+   const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+   const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+
+   deletePopupMessage.textContent = `Are you sure you want to remove ${courseTitle} from your wishlist?`;
+   deletePopup.style.display = "flex"; // Show pop-up
+
+   confirmDeleteBtn.onclick = () => {
+       removeFromWishlist(courseId);
+       deletePopup.style.display = "none"; // Close pop-up
+   };
+
+   cancelDeleteBtn.onclick = () => deletePopup.style.display = "none"; // Close pop-up if canceled
+}
+
+// Function to remove course from wishlist
+async function removeFromWishlist(courseId) {
+   let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+
+   // Remove course from wishlist
+   wishlist = wishlist.filter(course => course.id !== courseId);
+
+   // Save updated wishlist
+   localStorage.setItem('wishlist', JSON.stringify(wishlist));
+
+   showPopup('Course removed from wishlist!'); // Show pop-up message
+   displayWishlist(); // Refresh wishlist
+}
+
+   //search
+   document.addEventListener("DOMContentLoaded", async () => {
+      const searchInput = document.getElementById("searchInput");
+      const categoryFilter = document.getElementById("categoryFilter");
+      const coursesContainer = document.getElementById("courses-container");
+  
+      let allCourses = [];
+  
+      // Wait until courses are loaded by the original function
+      const waitForCourses = async () => {
+          while (coursesContainer.innerHTML === "<p>Loading courses...</p>") {
+              await new Promise(resolve => setTimeout(resolve, 500));
+          }
+          collectCourses();
+      };
+  
+      // Collect courses into an array without modifying the original function
+      function collectCourses() {
+          const courseCards = document.querySelectorAll(".course-card");
+          allCourses = Array.from(courseCards).map(course => ({
+              element: course,
+              title: course.querySelector("h3")?.innerText.toLowerCase() || "",
+              category: course.querySelector("span")?.innerText.replace("Category:", "").trim() || "Uncategorized"
+          }));
+  
+          populateCategoryFilter();
+      }
+  
+      // Populate category dropdown dynamically
+      function populateCategoryFilter() {
+          const categories = new Set(["All Categories"]);
+          allCourses.forEach(course => categories.add(course.category));
+  
+          categoryFilter.innerHTML = "";
+          categories.forEach(category => {
+              const option = document.createElement("option");
+              option.value = category.toLowerCase();
+              option.textContent = category;
+              categoryFilter.appendChild(option);
+          });
+      }
+  
+      // Apply search and category filter
+      function applyFilters() {
+          const searchText = searchInput.value.toLowerCase();
+          const selectedCategory = categoryFilter.value;
+  
+          allCourses.forEach(course => {
+              const matchesSearch = course.title.includes(searchText);
+              const matchesCategory = selectedCategory === "all categories" || course.category.toLowerCase() === selectedCategory;
+  
+              course.element.style.display = matchesSearch && matchesCategory ? "block" : "none";
+          });
+      }
+  
+      // Event listeners for filtering
+      searchInput.addEventListener("input", applyFilters);
+      categoryFilter.addEventListener("change", applyFilters);
+  
+      // Wait for original courses to load before filtering
+      waitForCourses();
+  });
+  
+</script>
+<script src="js/script.js"></script>
+
+</body>
+</html>
